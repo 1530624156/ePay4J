@@ -10,7 +10,7 @@
         <version>2.7.18</version>
     </parent>
 
-    <groupId>com.pay</groupId>
+    <groupId>com.mavis</groupId>
     <artifactId>epay</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
