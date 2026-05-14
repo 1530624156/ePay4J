@@ -23,4 +23,21 @@ public class Merchant {
     private Integer status;
 
     private LocalDateTime createTime;
+
+    private String userId;
+
+    /**
+     * 支付宝账号（提现账号）
+     */
+    private String alipayAccount;
+
+    /**
+     * 姓名
+     */
+    private String nickName;
+
+    /**
+     * 手机号
+     */
+    private String phone;
 }

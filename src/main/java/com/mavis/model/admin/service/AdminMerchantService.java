@@ -1,13 +1,21 @@
-package com.mavis.admin.service;
+package com.mavis.model.admin.service;
 
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+
+import java.math.BigDecimal;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.mavis.admin.dto.PageResult;
+import com.mavis.model.admin.dto.PageResult;
+import com.mavis.common.constant.Constants;
 import com.mavis.common.exception.BusinessException;
+import com.mavis.entity.AdminUser;
 import com.mavis.entity.Merchant;
+import com.mavis.entity.MerchantAccount;
+import com.mavis.mapper.AdminUserMapper;
 import com.mavis.mapper.MerchantMapper;
+import com.mavis.mapper.MerchantAccountMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -16,6 +24,15 @@ public class AdminMerchantService {
 
     @Autowired
     private MerchantMapper merchantMapper;
+
+    @Autowired
+    private AdminUserMapper adminUserMapper;
+
+    @Autowired
+    private MerchantAccountMapper merchantAccountMapper;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public PageResult<Merchant> getMerchantPage(int page, int size, String name, Integer status) {
         Page<Merchant> p = new Page<>(page, size);
@@ -42,12 +59,48 @@ public class AdminMerchantService {
         return merchantMapper.selectById(id);
     }
 
-    public Merchant createMerchant(String name) {
+    public Merchant createMerchant(String name, String username, String password) {
+        // 校验商户名
+        if (!StringUtils.hasText(name)) {
+            throw new IllegalArgumentException("商户名不能为空");
+        }
+        // 校验用户名是否已存在
+        AdminUser existUser = adminUserMapper.selectOne(
+                new LambdaQueryWrapper<AdminUser>().eq(AdminUser::getUsername, username)
+        );
+        if (existUser != null) {
+            throw new IllegalArgumentException("用户名已存在");
+        }
+        // 校验密码长度
+        if (password == null || password.length() < 6) {
+            throw new IllegalArgumentException("密码不能少于6位");
+        }
+
+        // 创建商户用户
+        AdminUser user = new AdminUser();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setNickname(name);
+        user.setRole(Constants.ROLE_MERCHANT);
+        user.setStatus(1);
+        adminUserMapper.insert(user);
+
+        // 创建商户并绑定用户ID
         Merchant m = new Merchant();
         m.setName(name);
         m.setMerchantKey(IdUtil.fastSimpleUUID());
         m.setStatus(1);
+        m.setUserId(String.valueOf(user.getId()));
         merchantMapper.insert(m);
+
+        // 创建商户账户记录，初始化余额为0
+        MerchantAccount account = new MerchantAccount();
+        account.setMerchantId(m.getId());
+        account.setTotalIncome(BigDecimal.ZERO);
+        account.setAvailableBalance(BigDecimal.ZERO);
+        account.setFrozenBalance(BigDecimal.ZERO);
+        merchantAccountMapper.insert(account);
+
         return m;
     }
 
@@ -75,6 +128,12 @@ public class AdminMerchantService {
     }
 
     public void deleteMerchant(Long id) {
+        Merchant m = merchantMapper.selectById(id);
+        if (m == null) throw new BusinessException("商户不存在");
+        // 删除绑定的用户
+        if (m.getUserId() != null && !m.getUserId().isEmpty()) {
+            adminUserMapper.deleteById(Long.parseLong(m.getUserId()));
+        }
         merchantMapper.deleteById(id);
     }
 }

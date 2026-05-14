@@ -1,8 +1,8 @@
-package com.mavis.admin.service;
+package com.mavis.model.admin.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.mavis.admin.dto.PageResult;
+import com.mavis.model.admin.dto.PageResult;
 import com.mavis.common.exception.BusinessException;
 import com.mavis.entity.AdminUser;
 import com.mavis.mapper.AdminUserMapper;

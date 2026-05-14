@@ -1,8 +1,9 @@
-package com.mavis.admin.controller;
+package com.mavis.model.admin.controller;
 
-import com.mavis.admin.dto.PageResult;
-import com.mavis.admin.dto.Result;
-import com.mavis.admin.service.AdminOrderService;
+import com.mavis.model.admin.dto.OrderVO;
+import com.mavis.model.admin.dto.PageResult;
+import com.mavis.model.admin.dto.Result;
+import com.mavis.model.admin.service.AdminOrderService;
 import com.mavis.entity.PayOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,15 +36,17 @@ public class AdminOrderController {
     }
 
     @GetMapping("/page")
-    public Result<PageResult<PayOrder>> page(
+    public Result<PageResult<OrderVO>> page(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String outTradeNo,
             @RequestParam(required = false) Integer status,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
-            @RequestParam(required = false) String payType) {
-        return Result.ok(adminOrderService.getOrderPage(page, size, outTradeNo, status, startDate, endDate, payType));
+            @RequestParam(required = false) String payType,
+            @RequestParam(required = false) Long merchantId,
+            @RequestParam(required = false) String merchantName) {
+        return Result.ok(adminOrderService.getOrderPage(page, size, outTradeNo, status, startDate, endDate, payType, merchantId, merchantName));
     }
 
     @GetMapping("/{id}")

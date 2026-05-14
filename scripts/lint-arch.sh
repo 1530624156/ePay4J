@@ -7,8 +7,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT"
 
-CONTROLLER_DIR="src/main/java/com/pay/controller"
-ADMIN_CONTROLLER_DIR="src/main/java/com/pay/admin/controller"
+CONTROLLER_DIR="src/main/java/com/mavis/controller"
+ADMIN_CONTROLLER_DIR="src/main/java/com/mavis/model/admin/controller"
 
 if [ ! -d "$CONTROLLER_DIR" ]; then
   echo "❌ 错误: 找不到 Controller 目录: $CONTROLLER_DIR"

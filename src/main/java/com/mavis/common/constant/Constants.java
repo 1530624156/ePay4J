@@ -12,4 +12,5 @@ public class Constants {
     public static final String ROLE_SUPER_ADMIN = "SUPER_ADMIN";
     public static final String ROLE_ADMIN = "ADMIN";
     public static final String ROLE_VIEWER = "VIEWER";
+    public static final String ROLE_MERCHANT = "MERCHANT";
 }

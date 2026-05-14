@@ -1,7 +1,7 @@
-package com.mavis.admin.controller;
+package com.mavis.model.admin.controller;
 
-import com.mavis.admin.dto.Result;
-import com.mavis.admin.service.AdminChannelService;
+import com.mavis.model.admin.dto.Result;
+import com.mavis.model.admin.service.AdminChannelService;
 import com.mavis.entity.PaymentChannelConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

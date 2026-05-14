@@ -43,7 +43,9 @@ public class SecurityConfig {
                 .antMatchers("/api/admin/auth/reset-password").permitAll()
                 .antMatchers("/api/alipay/**").permitAll()
                 .antMatchers("/submit.php", "/mapi.php", "/api.php").permitAll()
-                .antMatchers("/api/admin/**").authenticated()
+                .antMatchers("/api/merchant/auth/**").permitAll()
+                .antMatchers("/api/admin/**").hasRole("SUPER_ADMIN")
+                .antMatchers("/api/merchant/**").hasRole("MERCHANT")
                 .anyRequest().permitAll()
             .and()
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -1,7 +1,7 @@
-package com.mavis.admin.service;
+package com.mavis.model.admin.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.mavis.admin.dto.DashboardStatsVO;
+import com.mavis.model.admin.dto.DashboardStatsVO;
 import com.mavis.entity.PayOrder;
 import com.mavis.mapper.MerchantMapper;
 import com.mavis.mapper.PayOrderMapper;

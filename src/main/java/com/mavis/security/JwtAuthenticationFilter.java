@@ -1,6 +1,6 @@
 package com.mavis.security;
 
-import com.mavis.admin.dto.Result;
+import com.mavis.model.admin.dto.Result;
 import com.mavis.common.constant.Constants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,8 +1,8 @@
-package com.mavis.admin.controller;
+package com.mavis.model.admin.controller;
 
-import com.mavis.admin.dto.LoginRequest;
-import com.mavis.admin.dto.Result;
-import com.mavis.admin.service.AdminAuthService;
+import com.mavis.model.admin.dto.LoginRequest;
+import com.mavis.model.admin.dto.Result;
+import com.mavis.model.admin.service.AdminAuthService;
 import com.mavis.entity.AdminUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;

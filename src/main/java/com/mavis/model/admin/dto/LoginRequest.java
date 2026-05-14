@@ -1,4 +1,4 @@
-package com.mavis.admin.dto;
+package com.mavis.model.admin.dto;
 
 import lombok.Data;
 

@@ -1,9 +1,9 @@
-package com.mavis.admin.service;
+package com.mavis.model.admin.service;
 
 import cn.hutool.extra.servlet.ServletUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.mavis.admin.dto.LoginRequest;
-import com.mavis.admin.dto.LoginResponse;
+import com.mavis.model.admin.dto.LoginRequest;
+import com.mavis.model.admin.dto.LoginResponse;
 import com.mavis.common.exception.BusinessException;
 import com.mavis.entity.AdminUser;
 import com.mavis.mapper.AdminUserMapper;
@@ -36,6 +36,9 @@ public class AdminAuthService {
         }
         if (user.getStatus() != null && user.getStatus() == 0) {
             throw new BusinessException(403, "账号已被禁用");
+        }
+        if (!"SUPER_ADMIN".equals(user.getRole())) {
+            throw new BusinessException(403, "仅限超级管理员登录");
         }
 
         // 更新登录信息

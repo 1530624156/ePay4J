@@ -5,7 +5,7 @@ import cn.hutool.crypto.digest.DigestUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.mavis.admin.service.AdminChannelService;
+import com.mavis.model.admin.service.AdminChannelService;
 import com.mavis.common.constant.PaymentChannel;
 import com.mavis.entity.Merchant;
 import com.mavis.entity.PayOrder;

@@ -1,8 +1,9 @@
-package com.mavis.admin.controller;
+package com.mavis.model.admin.controller;
 
-import com.mavis.admin.dto.PageResult;
-import com.mavis.admin.dto.Result;
-import com.mavis.admin.service.AdminMerchantService;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.mavis.model.admin.dto.PageResult;
+import com.mavis.model.admin.dto.Result;
+import com.mavis.model.admin.service.AdminMerchantService;
 import com.mavis.entity.Merchant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,15 @@ public class AdminMerchantController {
 
     @PostMapping
     public Result<Merchant> create(@RequestBody Map<String, String> body) {
-        return Result.ok(adminMerchantService.createMerchant(body.get("name")));
+        String username = body.get("username");
+        String password = body.get("password");
+        if (username == null || StringUtils.isBlank(username)) {
+            throw new IllegalArgumentException("用户名不能为空");
+        }
+        if (password == null || StringUtils.isBlank(password)) {
+            throw new IllegalArgumentException("密码不能为空");
+        }
+        return Result.ok(adminMerchantService.createMerchant(body.get("name"), username, password));
     }
 
     @PutMapping("/{id}")

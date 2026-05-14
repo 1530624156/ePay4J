@@ -1,8 +1,8 @@
-package com.mavis.admin.controller;
+package com.mavis.model.admin.controller;
 
-import com.mavis.admin.dto.PageResult;
-import com.mavis.admin.dto.Result;
-import com.mavis.admin.service.AdminUserService;
+import com.mavis.model.admin.dto.PageResult;
+import com.mavis.model.admin.dto.Result;
+import com.mavis.model.admin.service.AdminUserService;
 import com.mavis.entity.AdminUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

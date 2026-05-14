@@ -7,7 +7,9 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.request.*;
 import com.alipay.api.response.*;
 import com.mavis.config.AlipayClientHolder;
+import com.mavis.entity.MerchantAccount;
 import com.mavis.entity.PayOrder;
+import com.mavis.mapper.MerchantAccountMapper;
 import com.mavis.mapper.PayOrderMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class AlipayService {
 
     @Autowired
     private PayOrderMapper payOrderMapper;
+
+    @Autowired
+    private MerchantAccountMapper merchantAccountMapper;
 
     @Autowired
     private MerchantNotifyService merchantNotifyService;
@@ -195,6 +200,11 @@ public class AlipayService {
             order.setStatus(1);
             order.setPayTime(LocalDateTime.now());
             log.info("订单支付成功: outTradeNo={}, tradeNo={}", outTradeNo, tradeNo);
+
+            // 更新商户余额
+            if (order.getPid() != null) {
+                updateMerchantAccount(order.getPid(), order.getTotalAmount());
+            }
         } else {
             order.setStatus(2);
         }
@@ -215,5 +225,18 @@ public class AlipayService {
 
     private String generateOrderNo() {
         return IdUtil.getSnowflakeNextIdStr();
+    }
+
+    private void updateMerchantAccount(Long merchantId, BigDecimal amount) {
+        MerchantAccount account = merchantAccountMapper.selectOne(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<MerchantAccount>()
+                        .eq(MerchantAccount::getMerchantId, merchantId)
+        );
+        if (account != null) {
+            account.setTotalIncome(account.getTotalIncome().add(amount));
+            account.setAvailableBalance(account.getAvailableBalance().add(amount));
+            merchantAccountMapper.updateById(account);
+            log.info("更新商户余额: merchantId={}, amount={}, newAvailable={}", merchantId, amount, account.getAvailableBalance());
+        }
     }
 }

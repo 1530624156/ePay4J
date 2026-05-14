@@ -1,10 +1,14 @@
-package com.mavis.admin.service;
+package com.mavis.model.admin.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.mavis.admin.dto.PageResult;
+import com.mavis.model.admin.dto.OrderVO;
+import com.mavis.model.admin.dto.PageResult;
+import com.mavis.entity.Merchant;
 import com.mavis.entity.PayOrder;
+import com.mavis.mapper.MerchantMapper;
 import com.mavis.mapper.PayOrderMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -22,12 +26,39 @@ public class AdminOrderService {
     private PayOrderMapper payOrderMapper;
 
     @Autowired
+    private MerchantMapper merchantMapper;
+
+    @Autowired
     private com.mavis.service.AlipayService alipayService;
 
-    public PageResult<PayOrder> getOrderPage(int page, int size, String outTradeNo,
-                                               Integer status, String startDate, String endDate, String payType) {
+    public PageResult<OrderVO> getOrderPage(int page, int size, String outTradeNo,
+                                               Integer status, String startDate, String endDate, String payType,
+                                               Long merchantId, String merchantName) {
         Page<PayOrder> p = new Page<>(page, size);
         LambdaQueryWrapper<PayOrder> wrapper = new LambdaQueryWrapper<>();
+
+        // 商户ID筛选
+        if (merchantId != null) {
+            wrapper.eq(PayOrder::getPid, merchantId);
+        }
+
+        // 商户名筛选（通过商户名查找对应商户ID）
+        if (StringUtils.hasText(merchantName)) {
+            List<Merchant> merchants = merchantMapper.selectList(
+                    new LambdaQueryWrapper<Merchant>().like(Merchant::getName, merchantName)
+            );
+            if (!merchants.isEmpty()) {
+                List<Long> merchantIds = new ArrayList<>();
+                for (Merchant m : merchants) {
+                    merchantIds.add(m.getId());
+                }
+                wrapper.in(PayOrder::getPid, merchantIds);
+            } else {
+                // 没有匹配商户时，结果为空
+                wrapper.eq(PayOrder::getPid, -1L);
+            }
+        }
+
         if (StringUtils.hasText(outTradeNo)) {
             wrapper.eq(PayOrder::getOutTradeNo, outTradeNo);
         }
@@ -47,8 +78,30 @@ public class AdminOrderService {
 
         Page<PayOrder> result = payOrderMapper.selectPage(p, wrapper);
 
-        PageResult<PayOrder> pr = new PageResult<>();
-        pr.setRecords(result.getRecords());
+        // 转换为VO并填充商户名
+        List<OrderVO> voList = new ArrayList<>();
+        Map<Long, String> merchantNameMap = new HashMap<>();
+
+        for (PayOrder order : result.getRecords()) {
+            OrderVO vo = new OrderVO();
+            BeanUtils.copyProperties(order, vo);
+
+            // 获取商户名
+            if (order.getPid() != null) {
+                String mName = merchantNameMap.get(order.getPid());
+                if (mName == null) {
+                    Merchant merchant = merchantMapper.selectById(order.getPid());
+                    mName = merchant != null ? merchant.getName() : "";
+                    merchantNameMap.put(order.getPid(), mName);
+                }
+                vo.setMerchantName(mName + "(" + order.getPid() + ")");
+            }
+
+            voList.add(vo);
+        }
+
+        PageResult<OrderVO> pr = new PageResult<>();
+        pr.setRecords(voList);
         pr.setTotal(result.getTotal());
         pr.setPage(result.getCurrent());
         pr.setSize(result.getSize());

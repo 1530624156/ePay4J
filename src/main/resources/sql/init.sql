@@ -32,5 +32,35 @@ CREATE TABLE `merchant` (
     `name` VARCHAR(128) NOT NULL COMMENT '商户名称',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1-启用 0-禁用',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `alipay_account` VARCHAR(128) DEFAULT NULL COMMENT '支付宝账号（提现账号）',
+    `nick_name` VARCHAR(64) DEFAULT NULL COMMENT '姓名',
+    `phone` VARCHAR(20) DEFAULT NULL COMMENT '手机号',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商户表';
+
+-- 商户账户表
+CREATE TABLE `merchant_account` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `merchant_id` BIGINT NOT NULL COMMENT '商户ID',
+    `total_income` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '累计收入',
+    `available_balance` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '可用余额',
+    `frozen_balance` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '冻结余额',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_merchant_id` (`merchant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商户账户表';
+
+-- 商户提现记录表
+CREATE TABLE `merchant_withdraw` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `merchant_id` BIGINT NOT NULL COMMENT '商户ID',
+    `amount` DECIMAL(12,2) NOT NULL COMMENT '提现金额',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态：0-待处理(处理中) 1-已提现(已完成) 2-已拒绝',
+    `remark` VARCHAR(255) DEFAULT NULL COMMENT '备注/拒绝原因',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_merchant_id` (`merchant_id`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商户提现记录表';
