@@ -1,0 +1,19 @@
+server:
+  port: 8888
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:4886/epay?serverTimezone=Asia/Shanghai&allowMultiQueries=true
+    username: root
+    password: 
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# JWT配置
+jwt:
+  secret: "epay-admin-jwt-secret-key-change-this-in-production-must-be-at-least-256-bits-long"
+  expiration: 86400000
