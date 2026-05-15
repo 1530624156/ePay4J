@@ -26,6 +26,16 @@ public class MerchantWithdraw {
     private BigDecimal amount;
 
     /**
+     * 手续费
+     */
+    private BigDecimal serviceFee;
+
+    /**
+     * 实际到账金额
+     */
+    private BigDecimal amountCredited;
+
+    /**
      * 任务状态：0-待处理(处理中) 1-已提现(已完成) 2-已拒绝
      */
     private Integer status;

@@ -9,11 +9,13 @@ import com.mavis.entity.Merchant;
 import com.mavis.entity.MerchantAccount;
 import com.mavis.entity.MerchantWithdraw;
 import com.mavis.entity.PayOrder;
+import com.mavis.entity.SystemConfig;
 import com.mavis.mapper.AdminUserMapper;
 import com.mavis.mapper.MerchantAccountMapper;
 import com.mavis.mapper.MerchantMapper;
 import com.mavis.mapper.MerchantWithdrawMapper;
 import com.mavis.mapper.PayOrderMapper;
+import com.mavis.mapper.SystemConfigMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import cn.hutool.core.util.IdUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,6 +42,9 @@ public class MerchantService {
 
     @Autowired
     private MerchantWithdrawMapper merchantWithdrawMapper;
+
+    @Autowired
+    private SystemConfigMapper systemConfigMapper;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -168,6 +173,19 @@ public class MerchantService {
             throw new IllegalArgumentException("可用余额不足");
         }
 
+        // 读取提现费率
+        SystemConfig rateConfig = systemConfigMapper.selectOne(
+                new LambdaQueryWrapper<SystemConfig>().eq(SystemConfig::getConfigKey, "rate")
+        );
+        BigDecimal rate = BigDecimal.ZERO;
+        if (rateConfig != null && rateConfig.getConfigValue() != null) {
+            rate = new BigDecimal(rateConfig.getConfigValue());
+        }
+
+        // 计算手续费和实际到账金额
+        BigDecimal serviceFee = amount.multiply(rate).setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal amountCredited = amount.subtract(serviceFee);
+
         // 冻结金额：可用余额减少，冻结余额增加
         account.setAvailableBalance(account.getAvailableBalance().subtract(amount));
         account.setFrozenBalance(account.getFrozenBalance().add(amount));
@@ -177,6 +195,8 @@ public class MerchantService {
         MerchantWithdraw withdraw = new MerchantWithdraw();
         withdraw.setMerchantId(merchantId);
         withdraw.setAmount(amount);
+        withdraw.setServiceFee(serviceFee);
+        withdraw.setAmountCredited(amountCredited);
         withdraw.setStatus(0); // 待处理(处理中)
         withdraw.setCreateTime(LocalDateTime.now());
         withdraw.setUpdateTime(LocalDateTime.now());

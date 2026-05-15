@@ -10,6 +10,8 @@ public class WithdrawDetailVO {
     private Long id;
     private Long merchantId;
     private BigDecimal amount;
+    private BigDecimal serviceFee;
+    private BigDecimal amountCredited;
     private Integer status;
     private String remark;
     private LocalDateTime createTime;
