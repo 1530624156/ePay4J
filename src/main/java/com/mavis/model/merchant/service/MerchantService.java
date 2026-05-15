@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -97,19 +98,40 @@ public class MerchantService {
         return account;
     }
 
-    public List<PayOrder> getOrders(Long merchantId, int page, int size) {
+    public List<PayOrder> getOrders(Long merchantId, int page, int size,
+                                     Integer status, String outTradeNo,
+                                     String startDate, String endDate) {
         Page<PayOrder> p = new Page<>(page, size);
-        LambdaQueryWrapper<PayOrder> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(PayOrder::getPid, merchantId);
+        LambdaQueryWrapper<PayOrder> wrapper = buildOrderQuery(merchantId, status, outTradeNo, startDate, endDate);
         wrapper.orderByDesc(PayOrder::getCreateTime);
         Page<PayOrder> result = payOrderMapper.selectPage(p, wrapper);
         return result.getRecords();
     }
 
-    public long getOrderCount(Long merchantId) {
-        return payOrderMapper.selectCount(
-                new LambdaQueryWrapper<PayOrder>().eq(PayOrder::getPid, merchantId)
-        );
+    public long getOrderCount(Long merchantId, Integer status, String outTradeNo,
+                              String startDate, String endDate) {
+        LambdaQueryWrapper<PayOrder> wrapper = buildOrderQuery(merchantId, status, outTradeNo, startDate, endDate);
+        return payOrderMapper.selectCount(wrapper);
+    }
+
+    private LambdaQueryWrapper<PayOrder> buildOrderQuery(Long merchantId, Integer status,
+                                                          String outTradeNo, String startDate,
+                                                          String endDate) {
+        LambdaQueryWrapper<PayOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(PayOrder::getPid, merchantId);
+        if (status != null) {
+            wrapper.eq(PayOrder::getStatus, status);
+        }
+        if (StringUtils.isNotBlank(outTradeNo)) {
+            wrapper.like(PayOrder::getOutTradeNo, outTradeNo);
+        }
+        if (StringUtils.isNotBlank(startDate)) {
+            wrapper.ge(PayOrder::getCreateTime, LocalDate.parse(startDate).atStartOfDay());
+        }
+        if (StringUtils.isNotBlank(endDate)) {
+            wrapper.lt(PayOrder::getCreateTime, LocalDate.parse(endDate).plusDays(1).atStartOfDay());
+        }
+        return wrapper;
     }
 
     public PayOrder getOrderDetail(Long orderId, Long merchantId) {
@@ -205,12 +227,11 @@ public class MerchantService {
         return withdraw;
     }
 
-    public List<MerchantWithdraw> getWithdrawRecords(Long merchantId, int page, int size) {
+    public Page<MerchantWithdraw> getWithdrawRecords(Long merchantId, int page, int size) {
         Page<MerchantWithdraw> p = new Page<>(page, size);
         LambdaQueryWrapper<MerchantWithdraw> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(MerchantWithdraw::getMerchantId, merchantId);
         wrapper.orderByDesc(MerchantWithdraw::getCreateTime);
-        Page<MerchantWithdraw> result = merchantWithdrawMapper.selectPage(p, wrapper);
-        return result.getRecords();
+        return merchantWithdrawMapper.selectPage(p, wrapper);
     }
 }

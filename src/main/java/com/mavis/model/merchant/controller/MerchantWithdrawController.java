@@ -1,6 +1,7 @@
 package com.mavis.model.merchant.controller;
 
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mavis.entity.Merchant;
 import com.mavis.entity.MerchantWithdraw;
 import com.mavis.model.admin.dto.Result;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -50,10 +50,11 @@ public class MerchantWithdrawController {
         Long userId = getCurrentUserId();
         Merchant merchant = merchantService.getMerchantInfoByUserId(userId);
 
-        List<MerchantWithdraw> records = merchantService.getWithdrawRecords(merchant.getId(), page, size);
+        Page<MerchantWithdraw> result = merchantService.getWithdrawRecords(merchant.getId(), page, size);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("records", records);
+        data.put("records", result.getRecords());
+        data.put("total", result.getTotal());
         data.put("page", page);
         data.put("size", size);
 

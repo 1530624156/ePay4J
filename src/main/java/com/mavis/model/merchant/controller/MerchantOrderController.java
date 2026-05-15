@@ -20,17 +20,21 @@ public class MerchantOrderController {
     private MerchantService merchantService;
 
     /**
-     * 获取当前商户的所有订单
+     * 获取当前商户的订单（支持筛选）
      */
     @GetMapping
     public Result<Map<String, Object>> getOrders(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) String outTradeNo,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
         Long userId = getCurrentUserId();
         com.mavis.entity.Merchant merchant = merchantService.getMerchantInfoByUserId(userId);
 
-        List<PayOrder> orders = merchantService.getOrders(merchant.getId(), page, size);
-        long total = merchantService.getOrderCount(merchant.getId());
+        List<PayOrder> orders = merchantService.getOrders(merchant.getId(), page, size, status, outTradeNo, startDate, endDate);
+        long total = merchantService.getOrderCount(merchant.getId(), status, outTradeNo, startDate, endDate);
 
         Map<String, Object> data = new HashMap<>();
         data.put("records", orders);
